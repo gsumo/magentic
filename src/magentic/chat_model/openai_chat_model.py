@@ -67,7 +67,7 @@ def message_to_openai_message(message: Message[Any]) -> ChatCompletionMessagePar
 
 @message_to_openai_message.register
 def _(message: SystemMessage) -> ChatCompletionMessageParam:
-    return {"role": OpenaiMessageRole.SYSTEM.value, "content": message.content}
+    return {"role": OpenaiMessageRole.SYSTEM.value, "content": message.content}x
 
 
 @message_to_openai_message.register
@@ -338,6 +338,7 @@ class OpenaiChatModel(ChatModel):
         max_tokens: int | None = None,
         seed: int | None = None,
         temperature: float | None = None,
+        client: any | None = None
     ):
         self._model = model
         self._api_key = api_key
@@ -349,10 +350,13 @@ class OpenaiChatModel(ChatModel):
 
         match api_type:
             case "openai":
-                self._client = openai.OpenAI(api_key=api_key, base_url=base_url)
-                self._async_client = openai.AsyncOpenAI(
-                    api_key=api_key, base_url=base_url
-                )
+                if client:
+                    self._client = client
+                else:
+                    self._client = openai.OpenAI(api_key=api_key, base_url=base_url)
+                    self._async_client = openai.AsyncOpenAI(
+                        api_key=api_key, base_url=base_url
+                    )
             case "azure":
                 self._client = openai.AzureOpenAI(
                     api_key=api_key,
